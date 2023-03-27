@@ -470,7 +470,7 @@ variable "instance_type" {
 }
 
 variable "instance_types" {
-  description = "List of instance types for the action runner. Defaults are based on runner_os (amzn2 for linux and Windows Server Core for win)."
+  description = "List of instance types for the action runner. Defaults are based on runner_os (amzn2 for linux, Windows Server Core for win and Mac)."
   type        = list(string)
   default     = ["m5.large", "c5.large"]
 }
@@ -596,13 +596,13 @@ variable "enable_managed_runner_security_group" {
 }
 
 variable "runner_os" {
-  description = "The EC2 Operating System type to use for action runner instances (linux,windows)."
+  description = "The EC2 Operating System type to use for action runner instances (linux,windows,mac)."
   type        = string
   default     = "linux"
 
   validation {
-    condition     = contains(["linux", "windows"], var.runner_os)
-    error_message = "Valid values for runner_os are (linux, windows)."
+    condition     = contains(["linux", "windows", "mac"], var.runner_os)
+    error_message = "Valid values for runner_os are (linux, windows, mac)."
   }
 }
 
@@ -725,4 +725,18 @@ variable "queue_encryption" {
     error_message = "Invalid configuration for `queue_encryption`. Valid configurations are encryption disabled, enabled via SSE. Or encryption via KMS."
   }
 }
+
+variable "placement" {
+  description = "The Placement Group of the instance."
+  type        = map(any)
+  default     = {
+      availability_zone       = null
+      affinity                = null
+      group_name              = null
+      host_id                 = null
+      host_resource_group_arn = null
+      tenancy                 = null
+  }
+}
+
 

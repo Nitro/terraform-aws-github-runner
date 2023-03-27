@@ -92,13 +92,13 @@ variable "role_path" {
 }
 
 variable "runner_os" {
-  description = "The EC2 Operating System type to use for action runner instances (linux,windows)."
+  description = "The EC2 Operating System type to use for action runner instances (linux,windows,mac)."
   type        = string
   default     = "linux"
 
   validation {
-    condition     = contains(["linux", "windows"], var.runner_os)
-    error_message = "Valid values for runner_os are (linux, windows)."
+    condition     = contains(["linux", "windows", "mac"], var.runner_os)
+    error_message = "Valid values for runner_os are (linux, windows, mac)."
   }
 }
 

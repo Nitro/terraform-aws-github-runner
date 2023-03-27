@@ -17,22 +17,28 @@ locals {
 
   default_ami = {
     "windows" = { name = ["Windows_Server-2022-English-Core-ContainersLatest-*"] }
-    "linux"   = var.runner_architecture == "arm64" ? { name = ["amzn2-ami-kernel-5.*-hvm-*-arm64-gp2"] } : { name = ["amzn2-ami-kernel-5.*-hvm-*-x86_64-gp2"] }
+    "linux"   = var.runner_architecture == "arm64" ? { name = ["amzn2-ami-kernel-5.*-hvm-*-arm64-gp2"] } : {
+      name = ["amzn2-ami-kernel-5.*-hvm-*-x86_64-gp2"]
+    }
+    "mac"     = { name = ["amzn-ec2-macos-*"] }
   }
 
   default_userdata_template = {
     "windows" = "${path.module}/templates/user-data.ps1"
     "linux"   = "${path.module}/templates/user-data.sh"
+    "mac"     = "${path.module}/templates/user-data.sh"
   }
 
   userdata_install_runner = {
     "windows" = "${path.module}/templates/install-runner.ps1"
     "linux"   = "${path.module}/templates/install-runner.sh"
+    "mac"     = "${path.module}/templates/install-runner.sh"
   }
 
   userdata_start_runner = {
     "windows" = "${path.module}/templates/start-runner.ps1"
     "linux"   = "${path.module}/templates/start-runner.sh"
+    "mac"     = "${path.module}/templates/start-runner.sh"
   }
 
   ami_filter = coalesce(var.ami_filter, local.default_ami[var.runner_os])
@@ -113,7 +119,7 @@ resource "aws_launch_template" "runner" {
 
   tag_specifications {
     resource_type = "instance"
-    tags = merge(
+    tags          = merge(
       local.tags,
       {
         "Name" = format("%s", local.name_runner)
@@ -124,7 +130,7 @@ resource "aws_launch_template" "runner" {
 
   tag_specifications {
     resource_type = "volume"
-    tags = merge(
+    tags          = merge(
       local.tags,
       {
         "Name" = format("%s", local.name_runner)
@@ -135,7 +141,7 @@ resource "aws_launch_template" "runner" {
   user_data = var.enabled_userdata ? base64encode(templatefile(local.userdata_template, {
     s3_location_runner_distribution = local.s3_location_runner_distribution
     pre_install                     = var.userdata_pre_install
-    install_runner = templatefile(local.userdata_install_runner[var.runner_os], {
+    install_runner                  = templatefile(local.userdata_install_runner[var.runner_os], {
       S3_LOCATION_RUNNER_DISTRIBUTION = local.s3_location_runner_distribution
       RUNNER_ARCHITECTURE             = var.runner_architecture
     })
@@ -153,6 +159,26 @@ resource "aws_launch_template" "runner" {
   tags = local.tags
 
   update_default_version = true
+
+  dynamic "placement" {
+    for_each = var.placement != null ? [var.placement] : []
+
+    content {
+      availability_zone       = placement.value.availability_zone
+      affinity                = placement.value.affinity
+      group_name              = placement.value.group_name
+      host_id                 = placement.value.host_id
+      host_resource_group_arn = placement.value.host_resource_group_arn
+      tenancy                 = placement.value.tenancy
+    }
+  }
+
+  dynamic "placement" {
+    for_each = var.placement != null ? [] : [0]
+
+    content { }
+  }
+
 }
 
 resource "aws_security_group" "runner_sg" {

@@ -40,15 +40,17 @@ const bucketName = 'my-bucket';
 const objectExtension: Record<string, string> = {
   linux: '.tar.gz',
   win: '.zip',
+  mac: '.tar.gz',
 };
 const bucketObjectNames: Record<string, string> = {
   linux: `actions-runner-linux${objectExtension['linux']}`,
   win: `actions-runner-windows${objectExtension['win']}`,
+  mac: `actions-runner-mac${objectExtension['mac']}`,
 };
 
 const bucketObjectKey = (os: string) => bucketObjectNames[os];
 
-const runnerOs = [['linux'], ['win']];
+const runnerOs = [['linux'], ['win'], ['mac']];
 
 const latestRelease = '2.296.2';
 

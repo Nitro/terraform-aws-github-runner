@@ -3,7 +3,8 @@ locals {
   role_path  = var.role_path == null ? "/${var.prefix}/" : var.role_path
   gh_binary_os_label = {
     windows = "win",
-    linux   = "linux"
+    linux   = "linux",
+    mac     = "mac"
   }
 }
 

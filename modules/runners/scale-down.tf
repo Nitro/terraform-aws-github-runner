@@ -3,6 +3,7 @@ locals {
   min_runtime_defaults = {
     "windows" = 15
     "linux"   = 5
+    "mac"     = 5
   }
 }
 resource "aws_lambda_function" "scale_down" {
